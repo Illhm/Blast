@@ -1,9 +1,12 @@
 import random
 import time
+import urllib.parse
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 options = webdriver.ChromeOptions()
 options.add_argument("--disable-gpu")
@@ -66,22 +69,26 @@ def warm_up():
         print(f"💬 Preparing to message: {phone}")
 
         # Direct URL to the chat with the message pre-filled
-        url = f"https://web.whatsapp.com/send?phone={phone}&text={msg}"
+        url = f"https://web.whatsapp.com/send?phone={phone}&text={urllib.parse.quote(msg)}"
         driver.get(url)
 
-        # Random wait while "typing" (8 to 15 seconds)
-        typing_delay = random.randint(8, 15)
-        print(f"⌨️ Mimicking typing for {typing_delay} seconds...")
-        time.sleep(typing_delay)
-
         try:
-            # Locate the send button
-            send_btn = driver.find_element(By.XPATH, '//span[@data-icon="send"]')
+            # Wait for the chat to load and the send button to become visible
+            print("⏳ Waiting for chat and send button to load...")
+            send_btn = WebDriverWait(driver, 60).until(
+                EC.presence_of_element_located((By.XPATH, '//span[@data-icon="send"]'))
+            )
+
+            # Random wait while "typing" (8 to 15 seconds)
+            typing_delay = random.randint(8, 15)
+            print(f"⌨️ Mimicking typing for {typing_delay} seconds...")
+            time.sleep(typing_delay)
+
             send_btn.click()
             print(f"✅ Message sent to {phone}: '{msg}'")
         except Exception as e:
             print(
-                f"⚠️ Could not send to {phone}. The chat might not have loaded correctly."
+                f"⚠️ Could not send to {phone}. The chat might not have loaded correctly. \nDetails: {e}"
             )
 
         # Long break between different contacts (30 to 90 seconds)
