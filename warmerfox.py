@@ -1,3 +1,4 @@
+import os
 import random
 import time
 
@@ -5,9 +6,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 
-options = webdriver.ChromeOptions()
-options.add_argument("--disable-gpu")
-options.add_argument("--disable-software-rasterizer")
+
+
+
 
 # --- CONFIGURATION ---
 FF_PROFILE_PATH = r"C:\Users\Administrator\AppData\Roaming\Mozilla\Firefox\Profiles\16qkizuj.default-release"
@@ -39,8 +40,12 @@ def warm_up():
     print("🚀 Starting WhatsApp Warmer for Firefox...")
 
     options = Options()
-    options.add_argument("-profile")
-    options.add_argument(FF_PROFILE_PATH)
+
+
+    if os.path.exists(FF_PROFILE_PATH):
+        options.profile = FF_PROFILE_PATH
+    else:
+        print("Profile not found, starting without custom profile.")
 
     # Initialize the driver
     try:
